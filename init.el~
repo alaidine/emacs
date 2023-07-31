@@ -11,12 +11,22 @@
 
 (setq visible-bell t)
 
+(column-number-mode)
+(global-display-line-numbers-mode t)
+
+;; disable line numbers for some mode
+(dolist (mode '(org-mode-hook
+		term-mode-hook
+		shell-mode-hook
+		eshell-mode-hook))
+  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+
 (set-face-attribute 'default nil :font "Hack Nerd Font" :height 100)
 
-;; Make esc quit prompts
+;; make esc quit prompts
 (global-set-key (kbd "<escape>") 'keyboard-escape-quit)
 
-;; Initialize package sources
+;; initialize package sources
 (require 'package)
 
 (setq package-archives '(("melpa" . "https://melpa.org/packages/")
@@ -53,7 +63,32 @@
   :config
   (ivy-mode 1))
 
+(use-package swiper
+  :ensure t)
+
 (use-package doom-modeline
   :ensure t
   :init (doom-modeline-mode 1)
-  :custom (doom-modeline-height 20))
+  :custom (doom-modeline-height 30))
+
+(use-package rainbow-delimiters
+  :hook (prog-mode . rainbow-delimiters-mode))
+
+(use-package which-key
+  :init (which-key-mode)
+  :diminish which-key-mode
+  :config
+  (setq which-key-idle-delay 0.3))
+
+(use-package ivy-rich
+  :init
+  (ivy-rich-mode 1))
+
+(use-package consel
+  :bind (("M-x" . counsel-M-x)
+	 ("C-X b" . counsel-ibuffer)
+	 ("C-x C-f" . counsel-find-file)
+	 :map minibuffer-local-map
+	 ("C-r" . 'counsel-minibuffer-history))
+  :config
+  (setq ivy-initial-inputs-aliast nil)) ;; don't start seaches with ^
