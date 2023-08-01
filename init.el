@@ -3,6 +3,8 @@
 
 (setq inhibit-startup-message t)
 
+(global-hl-line-mode 1)
+
 (scroll-bar-mode -1)   ; disable visible scrollbar
 (tool-bar-mode -1)     ; disable the toolbar
 (tooltip-mode -1)      ; disable tooltips
@@ -20,13 +22,13 @@
 (column-number-mode)
 (global-display-line-numbers-mode t)
 
-;; disable line numbers for some mode
+;; disable line numbers and cursorline highlihgt for some mode
 (dolist (mode '(org-mode-hook
 		vterm-mode-hook
 		term-mode-hook
 		shell-mode-hook
 		eshell-mode-hook))
-  (add-hook mode (lambda () (display-line-numbers-mode 0))))
+  (add-hook mode (defun foo () (*(display-line-numbers-mode 0)))))
 
 (set-face-attribute 'default nil :font "Hack Nerd Font" :height 100)
 
@@ -121,8 +123,15 @@
 
   (efs/leader-keys
     "t"  '(:ignore t :which-key "toggles")
+    "tv" '(vterm :which-key "vterm")
     "tt" '(counsel-load-theme :which-key "choose theme")
-    "fde" '(lambda () (interactive) (find-file (expand-file-name "~/.emacs.d/Emacs.org")))))
+
+    "b" '(:ignore t :which-key "buffer")
+    "bb" '(counsel-switch-buffer :which-key "switch buffer")
+    "be" '(eval-buffer :which-key "eval buffer")
+
+    "f" '(:ignore t :which-key "file")
+    "ff" '(find-file :which-key "find file")))
 
 (use-package evil
   :init
@@ -149,4 +158,7 @@
 
 (use-package vterm)
 
-(global-set-key (kbd "C-M-j") 'counsel-switch-buffer)
+(use-package dashboard
+  :ensure t
+  :config
+  (dashboard-setup-startup-hook))

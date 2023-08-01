@@ -1,1 +1,1 @@
-My config of emacs
+# My config of emacs
