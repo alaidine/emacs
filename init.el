@@ -3,8 +3,6 @@
 
 (setq inhibit-startup-message t)
 
-(global-hl-line-mode 1)
-
 (scroll-bar-mode -1)   ; disable visible scrollbar
 (tool-bar-mode -1)     ; disable the toolbar
 (tooltip-mode -1)      ; disable tooltips
@@ -27,6 +25,7 @@
 		vterm-mode-hook
 		term-mode-hook
 		shell-mode-hook
+		Welcome-mode-hook
 		eshell-mode-hook))
   (add-hook mode (defun foo () (*(display-line-numbers-mode 0)))))
 
@@ -158,7 +157,53 @@
 
 (use-package vterm)
 
-(use-package dashboard
-  :ensure t
+(use-package dired
+  :ensure nil
+  :commands (dired dired-jump)
+  :bind (("C-x C-j" . dired-jump))
+  :custom ((dired-listing-switches "-agho --group-directories-first"))
   :config
-  (dashboard-setup-startup-hook))
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "h" 'dired-single-up-directory
+    "l" 'dired-single-buffer))
+
+(use-package dired-single
+  :commands (dired dired-jump))
+
+(use-package all-the-icons-dired
+  :hook (dired-mode . all-the-icons-dired-mode))
+
+(use-package dired-open
+  :commands (dired dired-jump)
+  :config
+  ;; Doesn't work as expected!
+  ;;(add-to-list 'dired-open-functions #'dired-open-xdg t)
+  (setq dired-open-extensions '(("png" . "feh")
+                                ("mkv" . "mpv"))))
+
+(use-package dired-hide-dotfiles
+  :hook (dired-mode . dired-hide-dotfiles-mode)
+  :config
+  (evil-collection-define-key 'normal 'dired-mode-map
+    "H" 'dired-hide-dotfiles-mode))
+
+
+(use-package dashboard
+  :preface
+  (defun my/dashboard-banner ()
+    "Set a dashboard banner including information on package initialization
+  time and garbage collections."""
+    (setq dashboard-banner-logo-title
+          (format "Emacs ready in %.2f seconds with %d garbage collections."
+                  (float-time (time-subtract after-init-time before-init-time)) gcs-done)))
+  :config
+  (setq dashboard-startup-banner 'logo)
+  (dashboard-setup-startup-hook)
+  :hook ((after-init     . dashboard-refresh-buffer)
+         (dashboard-mode . my/dashboard-banner)))
+
+(defun on-after-init ()
+  (unless (display-graphic-p (selected-frame))
+    (set-face-background 'default "unspecified-bg" (selected-frame))))
+
+(add-hook 'window-setup-hook 'on-after-init)
